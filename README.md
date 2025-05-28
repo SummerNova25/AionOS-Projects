@@ -1,6 +1,6 @@
 # AionOS Projects
 
-AI projects by SummerNova25 including:
+AI projects including:
 
 - Image Caption Generator (BLIP model)
 - Text Summarization (T5 model)
