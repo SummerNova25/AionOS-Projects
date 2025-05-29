@@ -1,6 +1,5 @@
 from transformers import T5Tokenizer, T5ForConditionalGeneration
 import torch
-
 import re
 
 def clean_summary(text):
@@ -11,7 +10,7 @@ def clean_summary(text):
     text = re.sub(r'\s*:\s*', ': ', text)
     text = re.sub(r':\s*\.', '.', text)
     text = re.sub(r'\bthan ever before\b', '', text, flags=re.IGNORECASE)
-    text = re.sub(r'\s*e\.g\.\s*$', '.', text)  # Remove dangling e.g.
+    text = re.sub(r'\s*e\.g\.\s*$', '.', text) 
     text = re.sub(r'-?\s*[A-Z][a-z]+(?:\s[A-Z][a-z]+)+\.?', '', text)
     return text.strip()
 
@@ -21,7 +20,6 @@ def capitalize_first_letter(text):
     return '\n'.join(capitalized_paragraphs)
 
 def remove_random_dates(text):
-    # Remove patterns like day/time combos or dates
     patterns = [
         r'\b(thursday|monday|tuesday|wednesday|friday|saturday|sunday)\b\s*(night|morning|afternoon)?\s*(at)?\s*\d{1,2}(am|pm)?\s*(gmt)?',
         r'\b\d{1,2}(:\d{2})?\s*(am|pm)\b',
@@ -33,7 +31,6 @@ def remove_random_dates(text):
     return text.strip()
 
 def remove_incomplete_end(text):
-    # Remove incomplete endings like dangling hyphens or partial times
     text = re.sub(r'[-–—]\s*p\.m\.$', '.', text)
     text = re.sub(r'\s*-\s*$', '', text)
     return text.strip()
@@ -50,16 +47,14 @@ def summarize_paragraph(paragraph, compression_ratio=0.5):
         return_tensors="pt",
         max_length=512,
         truncation=True,
-        padding="longest"  # No excessive padding, just to longest seq in batch (here only one)
+        padding="longest"
     )
     
     input_ids = inputs['input_ids'][0]
-    input_length = (input_ids != tokenizer.pad_token_id).sum().item()  # real token count excluding padding
+    input_length = (input_ids != tokenizer.pad_token_id).sum().item() 
 
     max_summary_length = min(150, max(60, int(len(tokenizer.encode(paragraph)) * compression_ratio)))
 
-
-# and then pass it here as:
     summary_ids = model.generate(
     inputs["input_ids"],
     attention_mask=inputs["attention_mask"],
@@ -91,7 +86,6 @@ def summarize_text(paragraphs, compression_ratio=0.5):
 if __name__ == "__main__":
     print("Enter paragraphs to summarize (separate each by a blank line). Press Ctrl+D (Linux/Mac) or Ctrl+Z (Windows) when done:\n")
 
-    # Read multiline input from user until EOF
     user_input = []
     try:
         while True:
@@ -100,7 +94,6 @@ if __name__ == "__main__":
     except EOFError:
         pass
 
-    # Join lines and split paragraphs by empty lines
     text = "\n".join(user_input)
     paragraphs = [p.strip() for p in text.split('\n\n') if p.strip()]
 
